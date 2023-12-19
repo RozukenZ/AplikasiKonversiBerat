@@ -2,7 +2,10 @@ package com.kalkulatorberat.kkb;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -73,13 +76,15 @@ public class Main extends Application {
                         outputWeight = weightInGrams;
                 }
 
-                // Display the result or perform further actions
+
             } catch (NumberFormatException ex) {
-                // Handle invalid input
+
             }
         });
 
+        Label outputLabel = new Label();
 
+        vbox.getChildren().addAll(inputField, inputUnit, outputUnit, convertButton, outputLabel);
         primaryStage.show();
     }
 }
