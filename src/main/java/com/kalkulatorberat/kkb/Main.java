@@ -2,10 +2,7 @@ package com.kalkulatorberat.kkb;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -38,9 +35,9 @@ public class Main extends Application {
         outputUnit.getItems().addAll("KG", "G", "Ton", "Kuintal");
         outputUnit.setValue("KG");
 
-        Button convertButton = new Button("Konversi");
+        Label outputLabel = new Label();
 
-        vbox.getChildren().addAll(inputField, inputUnit, outputUnit, convertButton);
+        Button convertButton = new Button("Konversi");
 
         convertButton.setOnAction(e -> {
             try {
@@ -48,43 +45,28 @@ public class Main extends Application {
                 double weightInGrams;
 
                 switch (inputUnit.getValue()) {
-                    case "KG":
-                        weightInGrams = inputWeight * KILOGRAM_TO_GRAM;
-                        break;
-                    case "Ton":
-                        weightInGrams = inputWeight * TON_TO_GRAM;
-                        break;
-                    case "Kuintal":
-                        weightInGrams = inputWeight * KUINTAL_TO_GRAM;
-                        break;
-                    default:
-                        weightInGrams = inputWeight;
+                    case "KG" -> weightInGrams = inputWeight * KILOGRAM_TO_GRAM;
+                    case "Ton" -> weightInGrams = inputWeight * TON_TO_GRAM;
+                    case "Kuintal" -> weightInGrams = inputWeight * KUINTAL_TO_GRAM;
+                    default -> weightInGrams = inputWeight;
                 }
 
                 double outputWeight;
                 switch (outputUnit.getValue()) {
-                    case "KG":
-                        outputWeight = weightInGrams / KILOGRAM_TO_GRAM;
-                        break;
-                    case "Ton":
-                        outputWeight = weightInGrams / TON_TO_GRAM;
-                        break;
-                    case "Kuintal":
-                        outputWeight = weightInGrams / KUINTAL_TO_GRAM;
-                        break;
-                    default:
-                        outputWeight = weightInGrams;
+                    case "KG" -> outputWeight = weightInGrams / KILOGRAM_TO_GRAM;
+                    case "Ton" -> outputWeight = weightInGrams / TON_TO_GRAM;
+                    case "Kuintal" -> outputWeight = weightInGrams / KUINTAL_TO_GRAM;
+                    default -> outputWeight = weightInGrams;
                 }
 
-
+                outputLabel.setText("Hasil konversi: " + outputWeight + " " + outputUnit.getValue());
             } catch (NumberFormatException ex) {
-
+                outputLabel.setText("Masukkan angka yang valid untuk berat.");
             }
         });
 
-        Label outputLabel = new Label();
-
         vbox.getChildren().addAll(inputField, inputUnit, outputUnit, convertButton, outputLabel);
+
         primaryStage.show();
     }
 }
