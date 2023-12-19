@@ -8,6 +8,10 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    static final double KILOGRAM_TO_GRAM = 1000.0;
+    static final double TON_TO_GRAM = 1000000.0;
+    static final double KUINTAL_TO_GRAM = 100000.0;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -34,6 +38,47 @@ public class Main extends Application {
         Button convertButton = new Button("Konversi");
 
         vbox.getChildren().addAll(inputField, inputUnit, outputUnit, convertButton);
+
+        convertButton.setOnAction(e -> {
+            try {
+                double inputWeight = Double.parseDouble(inputField.getText());
+                double weightInGrams;
+
+                switch (inputUnit.getValue()) {
+                    case "KG":
+                        weightInGrams = inputWeight * KILOGRAM_TO_GRAM;
+                        break;
+                    case "Ton":
+                        weightInGrams = inputWeight * TON_TO_GRAM;
+                        break;
+                    case "Kuintal":
+                        weightInGrams = inputWeight * KUINTAL_TO_GRAM;
+                        break;
+                    default:
+                        weightInGrams = inputWeight;
+                }
+
+                double outputWeight;
+                switch (outputUnit.getValue()) {
+                    case "KG":
+                        outputWeight = weightInGrams / KILOGRAM_TO_GRAM;
+                        break;
+                    case "Ton":
+                        outputWeight = weightInGrams / TON_TO_GRAM;
+                        break;
+                    case "Kuintal":
+                        outputWeight = weightInGrams / KUINTAL_TO_GRAM;
+                        break;
+                    default:
+                        outputWeight = weightInGrams;
+                }
+
+                // Display the result or perform further actions
+            } catch (NumberFormatException ex) {
+                // Handle invalid input
+            }
+        });
+
 
         primaryStage.show();
     }
