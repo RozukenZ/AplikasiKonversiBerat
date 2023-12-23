@@ -83,7 +83,7 @@ public class Main extends Application {
 
     private void saveToHistory(double inputWeight, String inputUnit, double outputWeight, String outputUnit) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("riwayat.txt", true))) {
-            String historyEntry = String.format("%.2f %s %.2f %s", inputWeight, inputUnit, outputWeight, outputUnit);
+            String historyEntry = String.format("%.3f, %s, %.3f, %s", inputWeight, inputUnit, outputWeight, outputUnit);
             writer.write(historyEntry);
             writer.newLine();
         } catch (IOException e) {
