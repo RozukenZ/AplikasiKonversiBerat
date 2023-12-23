@@ -1,5 +1,9 @@
 package com.kalkulatorberat.kkb;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -59,14 +63,31 @@ public class Main extends Application {
                     default -> outputWeight = weightInGrams;
                 }
 
-                outputLabel.setText("Hasil konversi: " + outputWeight + " " + outputUnit.getValue());
+                String resultText = "Hasil konversi: " + outputWeight + " " + outputUnit.getValue();
+                outputLabel.setText(resultText);
+
+                // Menambahkan riwayat ke dalam file
+                saveToHistory(inputWeight, inputUnit.getValue(), outputWeight, outputUnit.getValue());
+
             } catch (NumberFormatException ex) {
                 outputLabel.setText("Masukkan angka yang valid untuk berat.");
             }
         });
 
+
         vbox.getChildren().addAll(inputField, inputUnit, outputUnit, convertButton, outputLabel);
 
         primaryStage.show();
+    }
+
+
+    private void saveToHistory(double inputWeight, String inputUnit, double outputWeight, String outputUnit) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("riwayat.txt", true))) {
+            String historyEntry = String.format("%.2f %s %.2f %s", inputWeight, inputUnit, outputWeight, outputUnit);
+            writer.write(historyEntry);
+            writer.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
