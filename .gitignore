@@ -31,10 +31,14 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 riwayat.txt
-plain.java
+
 /src/main/java/com/kalkulatorberat/kkb/SampleApp.java
 ### VS Code ###
 .vscode/
 
 ### Mac OS ###
-.DS_Store
+.DS_Store!/src/main/java/com/kalkulatorberat/kkb/plain.java
+/plain.java
+/plain2.java
+/riwayat.csv
+/.idea/csv-editor.xml

@@ -1,6 +1,7 @@
 package com.kalkulatorberat.kkb;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -82,12 +83,18 @@ public class Main extends Application {
 
 
     private void saveToHistory(double inputWeight, String inputUnit, double outputWeight, String outputUnit) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("riwayat.txt", true))) {
-            String historyEntry = String.format("%.3f, %s, %.3f, %s", inputWeight, inputUnit, outputWeight, outputUnit);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("riwayat.csv", true))) {
+            if (new File("riwayat.csv").length() == 0) {
+                writer.write("InputWeight,InputUnit,OutputWeight,OutputUnit");
+                writer.newLine();
+            }
+
+            String historyEntry = String.format("%.3f,%s,%.3f,%s", inputWeight, inputUnit, outputWeight, outputUnit);
             writer.write(historyEntry);
             writer.newLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 }
