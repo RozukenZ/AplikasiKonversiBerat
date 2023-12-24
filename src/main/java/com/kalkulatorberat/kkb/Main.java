@@ -1,13 +1,15 @@
 package com.kalkulatorberat.kkb;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.util.logging.*;
+import java.io.*;
 
 import javafx.application.Application;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -21,12 +23,47 @@ public class Main extends Application {
         launch(args);
     }
 
+    public static class data {
+        private final SimpleStringProperty f1;
+        private final SimpleStringProperty f2;
+        private final SimpleStringProperty f3;
+        private final SimpleStringProperty f4;
+
+        public String getF1() {
+            return f1.get();
+        }
+
+        public String getF2() {
+            return f2.get();
+        }
+
+        public String getF3() {
+            return f3.get();
+        }
+
+        public String getF4() {
+            return f4.get();
+        }
+
+        data(String f1, String f2, String f3, String f4) {
+            this.f1 = new SimpleStringProperty(f1);
+            this.f2 = new SimpleStringProperty(f2);
+            this.f3 = new SimpleStringProperty(f3);
+            this.f4 = new SimpleStringProperty(f4);
+        }
+    }
+
+    private final TableView<data> tableView = new TableView<>();
+
+    private final ObservableList<data> dataList
+            = FXCollections.observableArrayList();
+
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Kalkulator Konversi Berat");
 
         VBox vbox = new VBox();
-        Scene scene = new Scene(vbox, 300, 200);
+        Scene scene = new Scene(vbox, 330, 300);
         primaryStage.setScene(scene);
 
         TextField inputField = new TextField();
@@ -74,9 +111,22 @@ public class Main extends Application {
                 outputLabel.setText("Masukkan angka yang valid untuk berat.");
             }
         });
+        TableColumn columnF1 = new TableColumn("Berat Masuk");
+        columnF1.setCellValueFactory(new PropertyValueFactory<>("f1"));
 
+        TableColumn columnF2 = new TableColumn("Unit Masuk");
+        columnF2.setCellValueFactory(new PropertyValueFactory<>("f2"));
 
-        vbox.getChildren().addAll(inputField, inputUnit, outputUnit, convertButton, outputLabel);
+        TableColumn columnF3 = new TableColumn("Berat Keluar");
+        columnF3.setCellValueFactory(new PropertyValueFactory<>("f3"));
+
+        TableColumn columnF4 = new TableColumn("Unit Keluar");
+        columnF4.setCellValueFactory(new PropertyValueFactory<>("f4"));
+
+        tableView.setItems(dataList);
+        tableView.getColumns().addAll(columnF1, columnF2, columnF3, columnF4);
+        vbox.getChildren().addAll(inputField, inputUnit, outputUnit, convertButton, outputLabel, tableView);
+        readCSV();
 
         primaryStage.show();
     }
@@ -96,5 +146,38 @@ public class Main extends Application {
             e.printStackTrace();
         }
 
+    }
+
+    private void readCSV() {
+        String CsvFile = "C:/Users/ASUS/Downloads/vscode/KKB/riwayat.csv";
+        String FieldDelimiter = ",";
+
+        BufferedReader br;
+
+        try {
+            br = new BufferedReader(new FileReader(CsvFile));
+
+            String line;
+            boolean isFirstLine = true; // Flag untuk menandai baris pertama (header)
+            while ((line = br.readLine()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue; // Lewati baris header
+                }
+
+                String[] fields = line.split(FieldDelimiter, -1);
+
+                // Pastikan untuk sesuai dengan jumlah kolom yang benar
+                data record = new data(fields[0], fields[1], fields[2], fields[3]);
+                dataList.add(record);
+            }
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Main.class.getName())
+                    .log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName())
+                    .log(Level.SEVERE, null, ex);
+        }
     }
 }
