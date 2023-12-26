@@ -15,16 +15,28 @@ import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Kelas utama yang memperluas Aplikasi JavaFX dan menangani GUI serta logika konversi berat.
+ */
 public class Main extends Application {
 
+    // Konstanta untuk konversi unit
     static final double KILOGRAM_TO_GRAM = 1000.0;
     static final double TON_TO_GRAM = 1000000.0;
     static final double KUINTAL_TO_GRAM = 100000.0;
 
+    /**
+     * Metode utama yang dipanggil ketika aplikasi diluncurkan.
+     *
+     * @param args Argumen baris perintah
+     */
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Kelas data yang mewakili catatan konversi.
+     */
     public static class data {
         private final SimpleStringProperty f1;
         private final SimpleStringProperty f2;
@@ -47,6 +59,14 @@ public class Main extends Application {
             return f4.get();
         }
 
+        /**
+         * Konstruktor untuk kelas data.
+         *
+         * @param f1 Nilai berat masukan
+         * @param f2 Unit berat masukan
+         * @param f3 Nilai berat keluaran
+         * @param f4 Unit berat keluaran
+         */
         data(String f1, String f2, String f3, String f4) {
             this.f1 = new SimpleStringProperty(f1);
             this.f2 = new SimpleStringProperty(f2);
@@ -55,6 +75,7 @@ public class Main extends Application {
         }
     }
 
+    // Komponen GUI
     private final TableView<data> tableView = new TableView<>();
     private final ObservableList<data> dataList = FXCollections.observableArrayList();
     private final TextField inputField = new TextField();
@@ -63,6 +84,11 @@ public class Main extends Application {
     private final Label outputLabel = new Label();
     private final Button convertButton = new Button("Konversi");
 
+    /**
+     * Metode start yang dipanggil saat aplikasi diluncurkan.
+     *
+     * @param primaryStage Panggung utama untuk aplikasi
+     */
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Alat Konversi Berat");
@@ -144,7 +170,6 @@ public class Main extends Application {
         TableColumn columnF4 = new TableColumn("Unit Keluar");
         columnF4.setCellValueFactory(new PropertyValueFactory<>("f4"));
 
-        // Create a delete button column
         TableColumn<data, Void> deleteButtonColumn = new TableColumn<>("Delete");
         deleteButtonColumn.setCellFactory(param -> new TableCell<>() {
             private final Button deleteButton = new Button("Delete");
@@ -193,6 +218,7 @@ public class Main extends Application {
             e.printStackTrace();
         }
     }
+
 
     private void updateCSVFile() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("riwayat.csv"))) {
