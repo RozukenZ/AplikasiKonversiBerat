@@ -1,8 +1,5 @@
 package com.kalkulatorberat.kkb;
 
-import java.util.logging.*;
-import java.io.*;
-
 import javafx.application.Application;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -10,8 +7,13 @@ import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main extends Application {
 
@@ -54,32 +56,38 @@ public class Main extends Application {
     }
 
     private final TableView<data> tableView = new TableView<>();
-
-    private final ObservableList<data> dataList
-            = FXCollections.observableArrayList();
+    private final ObservableList<data> dataList = FXCollections.observableArrayList();
+    private final TextField inputField = new TextField();
+    private final ComboBox<String> inputUnit = new ComboBox<>(FXCollections.observableArrayList("KG", "G", "Ton", "Kuintal"));
+    private final ComboBox<String> outputUnit = new ComboBox<>(FXCollections.observableArrayList("KG", "G", "Ton", "Kuintal"));
+    private final Label outputLabel = new Label();
+    private final Button convertButton = new Button("Konversi");
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Kalkulator Konversi Berat");
+        primaryStage.setTitle("Alat Konversi Berat");
 
-        VBox vbox = new VBox();
-        Scene scene = new Scene(vbox, 330, 300);
+        VBox vbox = new VBox(10);
+        Scene scene = new Scene(vbox, 450, 400);
         primaryStage.setScene(scene);
 
-        TextField inputField = new TextField();
-        inputField.setPromptText("Masukkan berat");
+        HBox inputBox = new HBox(10);
+        inputBox.getChildren().addAll(new Label("Masukkan berat:"), inputField, inputUnit);
 
-        ComboBox<String> inputUnit = new ComboBox<>();
-        inputUnit.getItems().addAll("KG", "G", "Ton", "Kuintal");
-        inputUnit.setValue("KG");
+        HBox outputBox = new HBox(10);
+        outputBox.getChildren().addAll(new Label("Hasil konversi:"), outputLabel);
 
-        ComboBox<String> outputUnit = new ComboBox<>();
-        outputUnit.getItems().addAll("KG", "G", "Ton", "Kuintal");
-        outputUnit.setValue("KG");
+        HBox buttonBox = new HBox(10);
+        buttonBox.getChildren().addAll(convertButton);
 
-        Label outputLabel = new Label();
+        HBox unitBox = new HBox(10);
+        unitBox.getChildren().addAll(new Label("Dari unit:"), inputUnit, new Label("Ke unit:"), outputUnit);
 
-        Button convertButton = new Button("Konversi");
+        VBox historyBox = new VBox(10);
+        historyBox.getChildren().addAll(new Label("Riwayat Konversi"), tableView);
+
+        vbox.getChildren().addAll(inputBox, unitBox, buttonBox, outputBox, historyBox);
+        primaryStage.show();
 
         convertButton.setOnAction(e -> {
             try {
@@ -104,6 +112,18 @@ public class Main extends Application {
                 String resultText = "Hasil konversi: " + outputWeight + " " + outputUnit.getValue();
                 outputLabel.setText(resultText);
 
+                // Menambahkan hasil konversi ke dalam tabel
+                data convertedData = new data(
+                        String.valueOf(inputWeight),
+                        inputUnit.getValue(),
+                        String.valueOf(outputWeight),
+                        outputUnit.getValue()
+                );
+                dataList.add(convertedData);
+
+                // Update TableView
+                tableView.setItems(dataList);
+
                 // Menambahkan riwayat ke dalam file
                 saveToHistory(inputWeight, inputUnit.getValue(), outputWeight, outputUnit.getValue());
 
@@ -111,6 +131,7 @@ public class Main extends Application {
                 outputLabel.setText("Masukkan angka yang valid untuk berat.");
             }
         });
+
         TableColumn columnF1 = new TableColumn("Berat Masuk");
         columnF1.setCellValueFactory(new PropertyValueFactory<>("f1"));
 
@@ -123,14 +144,40 @@ public class Main extends Application {
         TableColumn columnF4 = new TableColumn("Unit Keluar");
         columnF4.setCellValueFactory(new PropertyValueFactory<>("f4"));
 
+        // Create a delete button column
+        TableColumn<data, Void> deleteButtonColumn = new TableColumn<>("Delete");
+        deleteButtonColumn.setCellFactory(param -> new TableCell<>() {
+            private final Button deleteButton = new Button("Delete");
+
+            {
+                deleteButton.setOnAction(event -> {
+                    // Get the selected data item
+                    data rowData = getTableView().getItems().get(getIndex());
+
+                    // Remove the item from TableView
+                    tableView.getItems().remove(rowData);
+
+                    // Update the CSV file after deletion
+                    updateCSVFile();
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(deleteButton);
+                }
+            }
+        });
+
         tableView.setItems(dataList);
-        tableView.getColumns().addAll(columnF1, columnF2, columnF3, columnF4);
-        vbox.getChildren().addAll(inputField, inputUnit, outputUnit, convertButton, outputLabel, tableView);
+        tableView.getColumns().addAll(columnF1, columnF2, columnF3, columnF4, deleteButtonColumn);
         readCSV();
-
-        primaryStage.show();
     }
-
 
     private void saveToHistory(double inputWeight, String inputUnit, double outputWeight, String outputUnit) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("riwayat.csv", true))) {
@@ -145,11 +192,30 @@ public class Main extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    private void updateCSVFile() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("riwayat.csv"))) {
+            writer.write("InputWeight,InputUnit,OutputWeight,OutputUnit");
+            writer.newLine();
+
+            // Write the data from the TableView to the CSV file
+            for (data record : dataList) {
+                String historyEntry = String.format(
+                        "%.3f,%s,%.3f,%s",
+                        Double.parseDouble(record.getF1()), record.getF2(),
+                        Double.parseDouble(record.getF3()), record.getF4()
+                );
+                writer.write(historyEntry);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void readCSV() {
-        String CsvFile = "C:/Users/ASUS/Downloads/vscode/KKB/riwayat.csv";
+        String CsvFile = "riwayat.csv";
         String FieldDelimiter = ",";
 
         BufferedReader br;
@@ -173,11 +239,9 @@ public class Main extends Application {
             }
 
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(Main.class.getName())
-                    .log(Level.SEVERE, null, ex);
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName())
-                    .log(Level.SEVERE, null, ex);
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
